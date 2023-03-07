@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<circuit>
+    <!-- head 中为一些关于这个文件的注释 -->
+    <head>
+        <title> xml 电路图测试 </title>
+        <description> 一个简单测试 </description>
+        <author> SongZihui-sudo </author>
+        <date> 2023-3-7 </date>
+    </head>
+    <!-- main 中为电路图的主体 -->
+    <main>
+        <vcc name="vcc1" type="vcc">
+            <value> 5 </value>  <!-- 电源的值 -->
+        </vcc>
+        <gnd name="GND1" type="gnd">
+            <value> 0 </value>  <!-- 地的值 -->
+        </gnd>
+        <!-- 电路图中的元件 -->
+        <component name="no1" type="no_gate">
+            <input>
+                <pin1>
+                    VCC1
+                </pin1>
+            </input> <!-- 元件的输入端 -->
+            <output>
+                <pin1>
+                    or1
+                </pin1>
+            </output>
+        </component>
+        <component name="no2" type="no_gate">
+            <input>
+                <pin1>
+                    GND1
+                </pin1>
+            </input> <!-- 元件的输入端 -->
+            <output>
+                <pin1>
+                    or1
+                </pin1>
+            </output>
+        </component>
+        <component name="or1" type="or_gate">
+            <input>
+                <pin1>
+                    no1
+                </pin1>
+                <pin2>
+                    no2
+                </pin2>
+            </input>
+            <output>
+                <pin1> None <!-- None 为空引脚，什么也没连 -->
+                </pin1>
+            </output>
+        </component>
+    </main>
+</circuit>
