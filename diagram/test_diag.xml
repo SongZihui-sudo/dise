@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<circuit>
+<root>
     <!-- head 中为一些关于这个文件的注释 -->
     <head>
         <title> xml 电路图测试 </title>
@@ -17,42 +17,40 @@
         </gnd>
         <!-- 电路图中的元件 -->
         <component name="no1" type="no_gate">
-            <input>
-                <pin1>
+            <!-- 元件的引脚定义 -->
+            <pins>
+                <pin name="input1" type="input" index="1">
                     VCC1
-                </pin1>
-            </input> <!-- 元件的输入端 -->
-            <output>
-                <pin1>
+                </pin>
+                <pin name="output1" type="output" index="2">
                     or1
-                </pin1>
-            </output>
+                </pin>
+            </pins>
         </component>
         <component name="no2" type="no_gate">
-            <input>
-                <pin1>
+            <!-- 元件的引脚定义 -->
+            <pins>
+                <pin name="input1" type="input" index="1">
                     GND1
-                </pin1>
-            </input> <!-- 元件的输入端 -->
-            <output>
-                <pin1>
+                </pin>
+                <pint name="output1" type="output" index="2">
                     or1
-                </pin1>
-            </output>
+                </pint>
+            </pins>
         </component>
         <component name="or1" type="or_gate">
-            <input>
-                <pin1>
+            <!-- 元件的引脚定义 -->
+            <pins>
+                <pin name="input1" type="input" index="1">
                     no1
-                </pin1>
-                <pin2>
+                </pin>
+                <pin name="input2" type="input" index="2">
                     no2
-                </pin2>
-            </input>
-            <output>
-                <pin1> None <!-- None 为空引脚，什么也没连 -->
-                </pin1>
-            </output>
+                </pin>
+                <pin name="output1" type="output" index="3">
+                    None
+                </pin>
+            </pins>
         </component>
     </main>
-</circuit>
+</root>

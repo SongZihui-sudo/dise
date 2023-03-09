@@ -64,10 +64,28 @@ public:
 
     /**
      * @brief 获取电路图主体对象的第一个节点
-     * 
+     *
      * @return  TiXmlElement*
-    */
+     */
     TiXmlElement* get_main_element();
+
+    /**
+     * @brief 获取元数据清单
+     * @return std::unordered_map< std::string, component > 有关于电路图的元数据
+     */
+    std::unordered_map< std::string, component > get_meta_data() const
+    {
+        return this->meta_data_list;
+    }
+
+    /**
+     * @brief 获取元器件清单
+     * @return std::unordered_map< std::string, int > 有关于电路图的元器件清单
+    */
+    std::unordered_map< std::string, int > get_component_list() const
+    {
+        return this->m_component_list;
+    }
 
 private:
     /**

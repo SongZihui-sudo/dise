@@ -98,21 +98,23 @@ void Parser::generate_meta_data_list( TiXmlElement* _node )
                 /* 获取元器件的名与类型 */
                 tmp.m_name = tmpele->Attribute( "name" );
                 tmp.m_type = tmpele->Attribute( "type" );
-                /* 获取元器件输入管脚信息 */
-                TiXmlElement* m_input_ele = new TiXmlElement( "input" );
-                GetNodePointerByName( tmpele, "input", m_input_ele );
-                for ( TiXmlElement* currentele = m_input_ele->FirstChildElement(); currentele;
-                      currentele               = currentele->NextSiblingElement() )
-                {
-                    tmp.m_inputs.insert( std::pair< std::string, bool >( currentele->GetText(), false ) );
-                }
-                /* 获取元器件输出管脚信息 */
-                TiXmlElement* m_output_ele = new TiXmlElement( "output" );
-                GetNodePointerByName( tmpele, "output", m_output_ele );
+                /* 获取元器件的管脚信息 */
+                TiXmlElement* m_output_ele = new TiXmlElement( "pins" );
+                GetNodePointerByName( tmpele, "pins", m_output_ele );
                 for ( TiXmlElement* currentele = m_output_ele->FirstChildElement(); currentele;
-                      currentele               = currentele->NextSiblingElement() )
+                      currentele = currentele->NextSiblingElement() )
                 {
-                    tmp.m_outputs.insert( std::pair< std::string, bool >( currentele->GetText(), false ) );
+                    /* 获取管脚名 */
+                    std::string pin_name = currentele->Attribute( "name" );
+                    /* 获取管教连接信息 */
+                    std::string pin_connect = currentele->GetText();
+                    /* 获取管教类型 */
+                    std::string pin_type = currentele->Attribute( "type" );
+                    /* 获取管脚索引 */
+                    std::size_t pin_index = std::stoi( currentele->Attribute( "index" ) );
+                    /* 插入管脚信息 */
+                    tmp.m_pins.insert( std::pair< std::string, pin >(
+                    pin_name, pin( pin_name, pin_type, pin_index, pin_connect, -1 ) ) );
                 }
             }
             else if ( tmpele->ValueStr() == "vcc" || tmpele->ValueStr() == "gnd" )
@@ -122,8 +124,9 @@ void Parser::generate_meta_data_list( TiXmlElement* _node )
                 tmp.m_type                = tmpele->Attribute( "type" );
                 TiXmlElement* m_input_ele = new TiXmlElement( "value" );
                 GetNodePointerByName( tmpele, "value", m_input_ele );
-                tmp.m_inputs.insert( std::pair< std::string, bool >( m_input_ele->GetText(), false ) );
-                tmp.m_outputs = tmp.m_inputs;
+                /* 插入管脚信息 */
+                tmp.m_pins.insert( std::pair< std::string, pin >(
+                "value", pin( "value", "input", std::stoi( m_input_ele->GetText() ), "None", 0 ) ) );
             }
             else
             {
