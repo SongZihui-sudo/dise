@@ -1,10 +1,12 @@
-#include "parser.h"
+#include <string>
+
 #include "../log/log.h"
+#include "parser.h"
 
 namespace dise
 {
 
-star::Logger::ptr g_logger( STAR_NAME( "global_logger" ) );
+static star::Logger::ptr g_logger( STAR_NAME( "global_logger" ) );
 
 bool Parser::read( std::string _filename )
 {
@@ -16,20 +18,20 @@ bool Parser::read( std::string _filename )
         << "Failed to load file " << _filename << star::Logger::endl();
         return false;
     }
+    DEBUG_STD_STREAM_LOG( g_logger ) << "Load file: " << _filename << " ok!" << star::Logger::endl();
     return true;
 }
 
 void Parser::generate_component_list( TiXmlElement* _node )
 {
-    while ( _node->ValueStr() != "main" )
+    if ( !_node )
     {
-        _node = _node->NextSiblingElement();
+        return;
     }
-    for ( TiXmlElement* currentele = _node->FirstChildElement(); currentele;
-          currentele               = currentele->NextSiblingElement() )
+    for ( TiXmlElement* currentele = _node; currentele; currentele = currentele->NextSiblingElement() )
     {
         TiXmlElement* tmpele = currentele;
-        if ( tmpele->GetText() != NULL )
+        if ( !tmpele->ValueStr().empty() )
         {
             /* 获取元器件类型名 */
             std::string attributValue = tmpele->Attribute( "type" );
@@ -42,15 +44,15 @@ void Parser::generate_component_list( TiXmlElement* _node )
                 m_component_list[attributValue]++;
             }
         }
-        if ( !tmpele->NoChildren() )
-        {
-            generate_component_list( tmpele );
-        }
     }
 }
 
-bool GetNodePointerByName( TiXmlElement* pRootEle, const char* strNodeName, TiXmlElement*& destNode )
+bool Parser::GetNodePointerByName( TiXmlElement* pRootEle, const char* strNodeName, TiXmlElement*& destNode )
 {
+    if ( !pRootEle )
+    {
+        return false;
+    }
     // if equal root node then return
     if ( 0 == strcmp( strNodeName, pRootEle->Value() ) )
     {
@@ -69,7 +71,6 @@ bool GetNodePointerByName( TiXmlElement* pRootEle, const char* strNodeName, TiXm
         else
         {
             destNode = pEle;
-            printf( "destination node name: %s\n", pEle->Value() );
             return true;
         }
     }
@@ -79,68 +80,50 @@ bool GetNodePointerByName( TiXmlElement* pRootEle, const char* strNodeName, TiXm
 
 void Parser::generate_meta_data_list( TiXmlElement* _node )
 {
-    while ( _node->ValueStr() != "main" )
+    if ( !_node )
     {
-        _node = _node->NextSiblingElement();
+        return;
     }
-    for ( TiXmlElement* currentele = _node->FirstChildElement(); currentele;
-          currentele               = currentele->NextSiblingElement() )
+    for ( TiXmlElement* currentele = _node; currentele; currentele = currentele->NextSiblingElement() )
     {
         TiXmlElement* tmpele = currentele;
-        if ( tmpele->GetText() != NULL )
+        if ( !tmpele->ValueStr().empty() )
         {
             /* 获取元器件类型名 */
             std::string attributValue = tmpele->Attribute( "type" );
             /* 获取元器件的名 */
-            if ( m_component_list.find( attributValue ) != m_component_list.end() )
+            component tmp;
+            if ( tmpele->ValueStr() == "component" )
             {
-                component tmp;
-                if ( tmpele->ValueStr() == "component" )
+                /* 获取元器件的名与类型 */
+                tmp.m_name = tmpele->Attribute( "name" );
+                tmp.m_type = tmpele->Attribute( "type" );
+                /* 获取元器件输入管脚信息 */
+                TiXmlElement* m_input_ele = new TiXmlElement( "input" );
+                GetNodePointerByName( tmpele, "input", m_input_ele );
+                for ( TiXmlElement* currentele = m_input_ele->FirstChildElement(); currentele;
+                      currentele               = currentele->NextSiblingElement() )
                 {
-                    /* 获取元器件的名与类型 */
-                    tmp.m_name = tmpele->Attribute( "name" );
-                    tmp.m_type = tmpele->Attribute( "type" );
-                    /* 获取元器件输入管脚信息 */
-                    TiXmlElement* m_input_ele = new TiXmlElement( "input" );
-                    GetNodePointerByName( tmpele, "input", m_input_ele );
-                    for ( TiXmlElement* currentele = m_input_ele->FirstChildElement(); currentele;
-                          currentele = currentele->NextSiblingElement() )
-                    {
-                        tmp.m_inputs.insert(
-                        std::pair< std::string, bool >( currentele->GetText(), false ) );
-                    }
-                    /* 获取元器件输出管脚信息 */
-                    TiXmlElement* m_output_ele = new TiXmlElement( "output" );
-                    GetNodePointerByName( tmpele, "output", m_output_ele );
-                    for ( TiXmlElement* currentele = m_output_ele->FirstChildElement(); currentele;
-                          currentele = currentele->NextSiblingElement() )
-                    {
-                        tmp.m_outputs.insert(
-                        std::pair< std::string, bool >( currentele->GetText(), false ) );
-                    }
+                    tmp.m_inputs.insert( std::pair< std::string, bool >( currentele->GetText(), false ) );
                 }
-                else if ( tmpele->ValueStr() == "vcc" || tmpele->ValueStr() == "gnd" )
+                /* 获取元器件输出管脚信息 */
+                TiXmlElement* m_output_ele = new TiXmlElement( "output" );
+                GetNodePointerByName( tmpele, "output", m_output_ele );
+                for ( TiXmlElement* currentele = m_output_ele->FirstChildElement(); currentele;
+                      currentele               = currentele->NextSiblingElement() )
                 {
-                    /* 获取元器件的名与类型 */
-                    tmp.m_name                = tmpele->Attribute( "name" );
-                    tmp.m_type                = tmpele->Attribute( "type" );
-                    TiXmlElement* m_input_ele = new TiXmlElement( "value" );
-                    GetNodePointerByName( tmpele, "value", m_input_ele );
-                    for ( TiXmlElement* currentele = m_input_ele->FirstChildElement(); currentele;
-                          currentele = currentele->NextSiblingElement() )
-                    {
-                        tmp.m_inputs.insert(
-                        std::pair< std::string, bool >( currentele->GetText(), false ) );
-                    }
-                    tmp.m_outputs = tmp.m_inputs;
+                    tmp.m_outputs.insert( std::pair< std::string, bool >( currentele->GetText(), false ) );
                 }
-                else
-                {
-                    ERROR_STD_STREAM_LOG( g_logger )
-                    << "No such component: " << attributValue << star::Logger::endl();
-                    return;
-                }
-                meta_data_list.insert( std::pair< std::string, component >( tmp.m_name, tmp ) );
+            }
+            else if ( tmpele->ValueStr() == "vcc" || tmpele->ValueStr() == "gnd" )
+            {
+                /* 获取元器件的名与类型 */
+                tmp.m_name                = tmpele->Attribute( "name" );
+                tmp.m_type                = tmpele->Attribute( "type" );
+                TiXmlElement* m_input_ele = new TiXmlElement( "value" );
+                GetNodePointerByName( tmpele, "value", m_input_ele );
+                tmp.m_inputs.insert( std::pair< std::string, bool >( m_input_ele->GetText(), false ) );
+                tmp.m_outputs = tmp.m_inputs;
             }
             else
             {
@@ -148,12 +131,21 @@ void Parser::generate_meta_data_list( TiXmlElement* _node )
                 << "No such component: " << attributValue << star::Logger::endl();
                 return;
             }
-        }
-        if ( !tmpele->NoChildren() )
-        {
-            generate_component_list( tmpele );
+            meta_data_list.insert( std::pair< std::string, component >( tmp.m_name, tmp ) );
         }
     }
+    return;
+}
+
+TiXmlElement* Parser::get_main_element()
+{
+    TiXmlElement* tmp = new TiXmlElement( "main" );
+    GetNodePointerByName( get_first_element(), "main", tmp );
+    if ( !tmp )
+    {
+        return nullptr;
+    }
+    return tmp->FirstChildElement();
 }
 
 }

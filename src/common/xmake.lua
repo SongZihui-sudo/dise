@@ -1,6 +1,6 @@
 add_rules("mode.debug", "mode.release")
 
-add_defines("Common")
+add_defines("_common_")
 
 target("common")
     set_kind("static")

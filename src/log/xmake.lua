@@ -1,6 +1,6 @@
 add_rules("mode.debug", "mode.release")
 
-add_defines("Log")
+add_defines("_log_")
 
 target("Logger")    
     add_deps("common")

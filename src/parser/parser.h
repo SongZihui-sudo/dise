@@ -6,7 +6,6 @@
 #include <tinyxml.h>
 #include <unordered_map>
 
-
 #include "../components.h"
 
 namespace dise
@@ -23,7 +22,11 @@ public:
      * @brief 构造函数
      *
      */
-    Parser(){};
+    Parser()
+    {
+        this->m_component_list = {};
+        this->meta_data_list   = {};
+    };
 
     /**
      * @brief 销毁对象
@@ -52,6 +55,20 @@ public:
      */
     void generate_meta_data_list( TiXmlElement* _node );
 
+    /**
+     * @brief 获取 xml 文档的第一个节点对象
+     *
+     * @return TiXmlElement*
+     */
+    TiXmlElement* get_first_element() { return this->doc->FirstChildElement(); }
+
+    /**
+     * @brief 获取电路图主体对象的第一个节点
+     * 
+     * @return  TiXmlElement*
+    */
+    TiXmlElement* get_main_element();
+
 private:
     /**
      * @brief 查找指定节点
@@ -65,7 +82,7 @@ private:
     bool GetNodePointerByName( TiXmlElement* pRootEle, const char* strNodeName, TiXmlElement*& destNode );
 
 private:
-    TiXmlDocument* doc; /* xml 文档对象 */
+    TiXmlDocument* doc = nullptr; /* xml 文档对象 */
 private:
     std::unordered_map< std::string, int > m_component_list; /* 元器件清单 */
     std::unordered_map< std::string, component > meta_data_list; /* 元器件类型，名称，输出输出信息 */

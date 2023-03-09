@@ -1,5 +1,7 @@
 add_rules("mode.debug", "mode.release")
 
+add_defines("_analyzer_")
+
 target("analyzer")
     set_kind("shared")
     add_files("./*.cpp")

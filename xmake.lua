@@ -1,7 +1,10 @@
 add_rules("mode.debug", "mode.release")
 
-includes("./src/parser/xmake.lua")
-includes("./src/log/xmake.lua")
+includes("./src/parser")
+includes("./src/log")
+includes("./src/common")
+includes("./src/analyzer")
+includes("./src/printer")
 
 add_requires("tinyxml")
 
